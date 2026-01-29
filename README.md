@@ -45,6 +45,11 @@ To get accurate results, you need to navigate through your device's **MODES**. W
 
 ---
 
+## 🌐 Live Web Version
+
+Don't want to run Python code? Use the professional web-based calculator directly in your browser. It features the same logic, real-time taxation, and a modern interface.
+
+👉 **[Launch RECC Web App](https://r3ner.github.io/RenerEnergyCostCalculator/web-version/)**
 ## 🛠️ Installation & Usage
 
 1. **Clone the repository:**
