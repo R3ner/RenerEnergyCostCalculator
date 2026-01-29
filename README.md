@@ -67,3 +67,33 @@ Enter your accumulated kWh and time from Mode 2.
 (Optional) Enter LO/HI Watts or press `Enter` to skip.
 
 Enter your electricity price and local tax percentage.
+
+## 🧮 How it Works: The Math Behind RECC
+
+RECC doesn't just multiply values; it simulates a real utility bill breakdown. Here is the mathematical logic used for the calculations:
+
+### 1. Consumption Metrics
+First, we establish the hourly burn rate ($C_h$) based on your meter's accumulated data:
+
+$$C_h = \frac{kWh_{acc}}{T_h}$$
+
+Where:
+* $kWh_{acc}$ = Total energy reported in Mode 2.
+* $T_h$ = Total elapsed time converted to hours.
+
+### 2. The Professional Cost Formula
+Unlike basic calculators, we apply the **cascading tax effect** used in the EU/Spanish energy market. The final cost per kWh ($P_{final}$) is calculated as follows:
+
+$$P_{final} = P_{base} \times (1 + IEE) \times (1 + VAT)$$
+
+Where:
+* $P_{base}$ = Your raw price per kWh (e.g., 0.17).
+* $IEE$ = Electricity Tax (**5.11%** or 0.0511).
+* $VAT$ = Value Added Tax (e.g., **21%** or 0.21).
+
+### 3. Hardware Load Projections
+For the **LO/HI** analysis, we calculate the theoretical monthly impact if the device stayed in that specific power state 24/7:
+
+$$Cost_{month} = \left( \frac{W}{1000} \right) \times 24 \times 30 \times P_{final}$$
+
+This allows you to see the "financial ceiling" and "financial floor" of your hardware's impact on your wallet.
