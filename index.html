@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECC PRO | Energy Cost Calculator</title>
+    <style>
+        /* ==== CSS VARIABLES & RESET ==== */
+        :root {
+            --primary: #00ff88;
+            --primary-dim: #00ff8840;
+            --bg-dark: #0f111a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 10% 20%, #16213e 0%, #0f111a 90%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* ==== DECORATIVE ORBS ==== */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+        }
+        .orb-1 { width: 300px; height: 300px; background: #00ff88; top: -50px; left: -50px; animation: float 10s infinite ease-in-out; }
+        .orb-2 { width: 250px; height: 250px; background: #4d4dff; bottom: 50px; right: -50px; animation: float 12s infinite ease-in-out reverse; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 50px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* ==== MAIN CONTAINER (GLASSMORPHISM) ==== */
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* ==== HEADER ==== */
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { font-size: 1.8rem; letter-spacing: 1px; margin-bottom: 0.5rem; text-transform: uppercase; }
+        h1 span { color: var(--primary); }
+        .subtitle { color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .subtitle a { color: var(--primary); text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+        .subtitle a:hover { text-shadow: 0 0 10px var(--primary); }
+
+        /* ==== FORM ELEMENTS ==== */
+        .input-group { margin-bottom: 1.2rem; }
+        label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+        
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+            outline: none;
+        }
+        
+        input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-dim); }
+        
+        .row { display: flex; gap: 15px; }
+        .row .input-group { flex: 1; }
+
+        /* ==== BUTTON ==== */
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #00b09b, #96c93d); /* Green energy vibe */
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3); }
+        button:active { transform: translateY(0); }
+
+        /* ==== RESULTS SECTION ==== */
+        #results { display: none; margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem; animation: slideUp 0.5s ease-out; }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-label { font-size: 0.9rem; color: var(--text-muted); }
+        .result-value { font-size: 1.1rem; font-weight: bold; color: var(--primary); }
+        .highlight { color: #ffeb3b; } /* Yellow for heavy costs */
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==== LOADER ==== */
+        .loader { display: none; text-align: center; margin-top: 20px; color: var(--primary); }
+
+        /* ==== FOOTER ==== */
+        footer { text-align: center; margin-top: 2rem; font-size: 0.75rem; color: var(--text-muted); opacity: 0.7; }
+
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <header>
+            <h1>RECC <span>WEB</span></h1>
+            <div class="subtitle">
+                Created by R3ner • 
+                <a href="https://github.com/R3ner/RenerEnergyCostCalculator" target="_blank">
+                    <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    GitHub Repo
+                </a>
+            </div>
+        </header>
+
+        <form id="calcForm">
+            <div class="row">
+                <div class="input-group">
+                    <label>Accumulated kWh (Mode 2)</label>
+                    <input type="number" step="0.001" id="kwh" placeholder="e.g. 2.935" required>
+                </div>
+                <div class="input-group">
+                    <label>Elapsed Time</label>
+                    <input type="text" id="time" placeholder="e.g. 1d18h06m" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>Min Power (LO) - Opt.</label>
+                    <input type="number" id="loWatts" placeholder="Watts">
+                </div>
+                <div class="input-group">
+                    <label>Max Power (HI) - Opt.</label>
+                    <input type="number" id="hiWatts" placeholder="Watts">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>Price per kWh (€)</label>
+                    <input type="number" step="0.0001" id="price" value="0.17" required>
+                </div>
+                <div class="input-group">
+                    <label>VAT / IVA (%)</label>
+                    <input type="number" id="tax" value="21" required>
+                </div>
+            </div>
+
+            <button type="submit">Calculate Costs</button>
+        </form>
+
+        <div class="loader" id="loader">
+            ⏳ Analyzing consumption...
+        </div>
+
+        <div id="results">
+            <h3 style="margin-bottom: 15px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Analysis Report</h3>
+            
+            <div class="result-card">
+                <span class="result-label">Real Price (w/ Taxes)</span>
+                <span class="result-value" id="resPrice">0.0000 €</span>
+            </div>
+            
+            <div class="result-card">
+                <span class="result-label">Daily Cost</span>
+                <span class="result-value" id="resDaily">0.00 €</span>
+            </div>
+
+            <div class="result-card" style="border: 1px solid var(--primary-dim);">
+                <span class="result-label">Monthly Projection</span>
+                <span class="result-value" id="resMonthly" style="font-size: 1.3rem;">0.00 €</span>
+            </div>
+
+            <div class="result-card">
+                <span class="result-label">Monthly Consumption</span>
+                <span class="result-value" id="resCons">0.00 kWh</span>
+            </div>
+
+            <div class="row" style="margin-top: 10px;">
+                <div class="result-card" style="flex:1; flex-direction: column; align-items: flex-start;">
+                    <span class="result-label" style="font-size: 0.7rem;">IDLE COST (LO)</span>
+                    <span class="result-value" id="resLo" style="font-size: 0.9rem; color: var(--text-muted);">Skipped</span>
+                </div>
+                <div class="result-card" style="flex:1; flex-direction: column; align-items: flex-end;">
+                    <span class="result-label" style="font-size: 0.7rem;">PEAK COST (HI)</span>
+                    <span class="result-value highlight" id="resHi" style="font-size: 0.9rem;">Skipped</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Logic based on Spain/EU Regulations (IEE 5.11% + VAT)
+        </footer>
+    </div>
+
+    <script>
+        // ==== LOGIC PORTED FROM PYTHON ====
+
+        // Parse time string (e.g., 1d4h20m) -> total hours
+        function parseTimeString(str) {
+            const regex = /(\d+\.?\d*)(s|m|h|d|w|Mo)/g;
+            let totalHours = 0;
+            let match;
+            let found = false;
+
+            while ((match = regex.exec(str)) !== null) {
+                found = true;
+                const val = parseFloat(match[1]);
+                const unit = match[2];
+
+                switch(unit) {
+                    case 's': totalHours += val / 3600; break;
+                    case 'm': totalHours += val / 60; break;
+                    case 'h': totalHours += val; break;
+                    case 'd': totalHours += val * 24; break;
+                    case 'w': totalHours += val * 24 * 7; break;
+                    case 'Mo': totalHours += val * 24 * 30; break;
+                }
+            }
+            return found ? totalHours : 0;
+        }
+
+        // Handle Form Submit
+        document.getElementById('calcForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const kwh = parseFloat(document.getElementById('kwh').value);
+            const timeStr = document.getElementById('time').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const tax = parseFloat(document.getElementById('tax').value);
+            
+            // Optional inputs
+            const loInput = document.getElementById('loWatts').value;
+            const hiInput = document.getElementById('hiWatts').value;
+
+            // Validation
+            const hours = parseTimeString(timeStr);
+            if (hours === 0) {
+                alert("❌ Invalid Time Format! Use format like '1d 2h 30m'");
+                return;
+            }
+
+            // UX: Show Loader
+            const loader = document.getElementById('loader');
+            const resultsDiv = document.getElementById('results');
+            
+            loader.style.display = 'block';
+            resultsDiv.style.display = 'none';
+
+            // Simulate "Thinking" delay
+            setTimeout(() => {
+                // ==== CALCULATION CORE ====
+                const kwhPerHour = kwh / hours;
+                const ieeFactor = 1.0511; // 5.11% Electricity Tax
+                const vatFactor = 1 + (tax / 100);
+                
+                const realPrice = price * ieeFactor * vatFactor;
+                
+                const costHour = kwhPerHour * realPrice;
+                const costDaily = costHour * 24;
+                const costMonthly = costDaily * 30;
+                const consMonthly = kwhPerHour * 24 * 30;
+
+                // Update DOM
+                document.getElementById('resPrice').innerText = `${realPrice.toFixed(4)} €/kWh`;
+                document.getElementById('resDaily').innerText = `${costDaily.toFixed(2)} €`;
+                document.getElementById('resMonthly').innerText = `${costMonthly.toFixed(2)} €`;
+                document.getElementById('resCons').innerText = `${consMonthly.toFixed(2)} kWh`;
+
+                // Handle LO/HI Logic
+                const resLo = document.getElementById('resLo');
+                const resHi = document.getElementById('resHi');
+
+                if (loInput) {
+                    const loCost = (parseFloat(loInput)/1000) * 24 * 30 * realPrice;
+                    resLo.innerText = `${loCost.toFixed(2)} €`;
+                    resLo.style.color = "#fff";
+                } else {
+                    resLo.innerText = "Skipped";
+                    resLo.style.color = "var(--text-muted)";
+                }
+
+                if (hiInput) {
+                    const hiCost = (parseFloat(hiInput)/1000) * 24 * 30 * realPrice;
+                    resHi.innerText = `${hiCost.toFixed(2)} €`;
+                } else {
+                    resHi.innerText = "Skipped";
+                }
+
+                // Show Results
+                loader.style.display = 'none';
+                resultsDiv.style.display = 'block';
+            }, 1500); // 1.5s delay
+        });
+    </script>
+</body>
+</html>
