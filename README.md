@@ -1,7 +1,11 @@
 # 💡 Rener Energy Cost Calculator (RECC)
 
-![Python Version](https://img.shields.io/badge/python-3.6+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Python](https://img.shields.io/badge/python-3.6+-3776AB?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-2ea44f?logo=opensourceinitiative&logoColor=white)
+![HTML5](https://img.shields.io/badge/html5-web-E34F26?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/css3-style-1572B6?logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-scripts-F7DF1E?logo=javascript&logoColor=black)
+
 
 **RECC** is a professional-grade CLI tool designed to bridge the gap between "what your energy meter says" and "what you actually pay." Specifically optimized for 24/7 hardware like **Minecraft Servers**, Home Labs, and Workstations.
 
